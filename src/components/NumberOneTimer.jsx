@@ -1,46 +1,44 @@
-import React from "react";
+import React, { useState } from "react";
 
 function NumberOneTimer() {
-  let startTime,
-    elapsedTime = 0,
-    intervalId;
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [intervalId, setIntervalId] = useState(null);
+  const [timeArr, setTimeArr] = useState([]);
+
+  let startTime;
 
   function startPottyTimer() {
     if (!intervalId) {
       startTime = Date.now() - elapsedTime;
-      intervalId = setInterval(updateTime, 10);
+      const id = setInterval(updateTime, 10);
+      setIntervalId(id);
     }
   }
+
   function stopPottyTimer() {
     if (intervalId) {
       clearInterval(intervalId);
-      intervalId = null;
-      elapsedTime = Date.now() - startTime;
+      setIntervalId(null);
+      setElapsedTime(Date.now() - startTime);
+      setTimeArr([...timeArr, elapsedTime]);
     }
   }
 
   function resetPottyTimer() {
     stopPottyTimer();
-    elapsedTime = 0;
-    updateTime();
+    setElapsedTime(0);
   }
 
   function updateTime() {
     const time = new Date(Date.now() - startTime);
     const formattedTime = formatTime(time);
-    document.getElementById("display").textContent = formattedTime;
+    setElapsedTime(Date.now() - startTime);
   }
 
   function formatTime(time) {
     const minutes = time.getMinutes().toString().padStart(2, "0");
     const seconds = time.getSeconds().toString().padStart(2, "0");
-    const milliseconds = time
-      .getMilliseconds()
-      .toString()
-      .slice(0, 2)
-      .padStart(2, "0");
-
-    return `${minutes}:${seconds}.${milliseconds}`;
+    return `${minutes}:${seconds}`;
   }
 
   return (
@@ -49,7 +47,18 @@ function NumberOneTimer() {
       <button onClick={startPottyTimer}>Start</button>
       <button onClick={stopPottyTimer}>Stop</button>
       <button onClick={resetPottyTimer}>Reset</button>
-      <div id="display">00:00.00</div>
+      {!elapsedTime ? (
+        <div>00:00</div>
+      ) : (
+        <div>{formatTime(new Date(elapsedTime))}</div>
+      )}
+      {timeArr.length > 0 && (
+        <ul>
+          {timeArr.map((time, index) => (
+            <li key={index}>{formatTime(new Date(time))}</li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
